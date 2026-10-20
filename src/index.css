@@ -1,0 +1,171 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Theme tokens. Light values on :root, dark on .dark (the default class on <html>). */
+:root {
+  --bg: #f7f7f5;
+  --surface: #ffffff;
+  --surface-2: #efefeb;
+  --line: #e2e2dc;
+  --fg: #0b0d10;
+  --muted: #525a66;
+  --accent: #0f766e;
+  --accent-soft: rgb(15 118 110 / 0.1);
+  --on-accent: #ffffff;
+  --glow-a: rgb(20 184 166 / 0.18);
+  --glow-b: rgb(56 189 248 / 0.14);
+  --grid: rgb(11 13 16 / 0.07);
+}
+
+.dark {
+  --bg: #07090c;
+  --surface: #0d1015;
+  --surface-2: #141820;
+  --line: #1d222c;
+  --fg: #e9ebee;
+  --muted: #9aa3b0;
+  --accent: #2dd4bf;
+  --accent-soft: rgb(45 212 191 / 0.1);
+  --on-accent: #04201c;
+  --glow-a: rgb(45 212 191 / 0.16);
+  --glow-b: rgb(56 189 248 / 0.1);
+  --grid: rgb(255 255 255 / 0.05);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-on-accent: var(--on-accent);
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Space Grotesk Variable', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-bg font-sans text-fg antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  ::selection {
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+}
+
+/* Hero backdrop: masked dot grid + two slowly drifting glows. */
+.hero-grid {
+  background-image: radial-gradient(var(--grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 30%, transparent 75%);
+}
+.hero-glow {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(80px);
+  will-change: transform;
+}
+.hero-glow-a {
+  background: var(--glow-a);
+  animation: drift-a 18s ease-in-out infinite alternate;
+}
+.hero-glow-b {
+  background: var(--glow-b);
+  animation: drift-b 22s ease-in-out infinite alternate;
+}
+@keyframes drift-a {
+  to {
+    transform: translate3d(12%, 10%, 0) scale(1.08);
+  }
+}
+@keyframes drift-b {
+  to {
+    transform: translate3d(-14%, -6%, 0) scale(1.12);
+  }
+}
+
+/* Entrance for above-the-fold hero content (CSS so it starts before JS hydrates). */
+.rise {
+  animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--d, 0ms);
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+/* Headline only slides (no fade) so it paints immediately for LCP. */
+.rise-solid {
+  animation: rise-solid 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes rise-solid {
+  from {
+    transform: translateY(18px);
+  }
+}
+
+/* Hero portrait: gradient frame, dark-to-teal backdrop behind the cut-out photo, entrance + slow float. */
+.portrait-border {
+  background: linear-gradient(
+    155deg,
+    color-mix(in srgb, var(--accent) 75%, transparent),
+    color-mix(in srgb, var(--accent) 8%, transparent) 45%,
+    color-mix(in srgb, var(--accent) 55%, transparent)
+  );
+}
+.portrait-bg {
+  background: linear-gradient(165deg, #0d1015 0%, #0e2224 55%, #155a51 100%);
+}
+:root:not(.dark) .portrait-bg {
+  background: linear-gradient(165deg, #eef4f3 0%, #cfe9e5 55%, #94d3ca 100%);
+}
+.portrait-in {
+  animation: portrait-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+}
+@keyframes portrait-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+.portrait-float {
+  animation: float 9s ease-in-out infinite alternate;
+}
+@keyframes float {
+  from {
+    transform: translateY(4px);
+  }
+  to {
+    transform: translateY(-8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
